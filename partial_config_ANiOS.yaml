@@ -1,0 +1,41 @@
+automation old:
+  - alias: Notify iOS Janis Garage #creates the notification
+    initial_state: True
+    hide_entity: True
+    trigger:
+      - platform: time
+        at: '22:00:00' #change this to actual trigger
+    condition:
+      condition: state
+      entity_id: cover.double #id of your garage door relay
+      state: open
+    action:
+        service: notify.ios_justin_iphone_ #id of your ios device, might not show up until you've loaded the ios component in HA
+        data:
+          title: "Janis' Garage Check" #customizable
+          message: "It's 10pm and Janis' Garage is Open" #customizable 
+          data:
+            push:
+              badge: 0 # this will remove the badge/app icon number
+              category: 'GARAGE1' #name matched in ios component
+
+  - alias: iOS app notification action garage1 #creates the action button
+    initial_state: True
+    hide_entity: True  
+    trigger:
+      platform: event
+      event_type: ios.notification_action_fired
+      event_data:
+        actionName: CLOSE_JANIS #name matched in ios component
+    action:
+      service: cover.close_cover
+      entity_id: cover.double
+
+ios: #ios component
+  push:
+    categories:
+      - name: garage1
+        identifier: 'GARAGE1'
+        actions:
+          - identifier: 'CLOSE_JANIS' ## this must point to an action ##
+            title: 'Close Janis Garage Door'
